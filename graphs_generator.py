@@ -73,7 +73,7 @@ def make_graph(config: dict, operation: str, rows: int, cols: int, height: int) 
     if operation == "mean":
         title = "Средни денонощни стойности"
     elif operation == "max":
-        title = "Максимални денонощни стойности"
+        title = "Максимални еднократни стойности за денонощие"
 
     graph = "<h2>{title}</h2>".format(title=title)
 
