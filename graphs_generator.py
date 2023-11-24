@@ -3,6 +3,7 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import json
 import numpy as np
+import bs4
 
 
 def read_config() -> dict:
@@ -68,7 +69,7 @@ def get_subplot_titles(config: dict, operation: str):
     return subplot_titles
 
 
-def make_graph(config: dict, operation: str) -> str:
+def make_graph(config: dict, operation: str, rows: int, cols: int, height: int) -> str:
     if operation == "mean":
         title = "Средни денонощни стойности"
     elif operation == "max":
@@ -78,12 +79,16 @@ def make_graph(config: dict, operation: str) -> str:
 
     subplot_titles = get_subplot_titles(config, operation)
 
-    fig = make_subplots(rows=3, cols=3, subplot_titles=subplot_titles)
+    fig = make_subplots(rows=rows, cols=cols, subplot_titles=subplot_titles)
     fig.update_layout(showlegend=False)
 
-    for compound in config['compounds']:
-        compound_name = compound['name']
-        data = perform_analysis(read_data(compound_name, config), operation, compound)
+    col = 1
+    row = 1
+
+    for compound_config in config['compounds']:
+        compound_name = compound_config['name']
+
+        data = perform_analysis(read_data(compound_name, config), operation, compound_config)
 
         fig.add_trace(
             go.Bar(
@@ -92,34 +97,83 @@ def make_graph(config: dict, operation: str) -> str:
                 name=compound_name,
                 marker_color=list(map(bar_color, data["Limit"])),
             ),
-            row=compound['row'],
-            col=compound['col']
+            row=row,
+            col=col
         )
 
-        fig.update_xaxes(title_text="Дата", row=compound['row'], col=compound['col'])
-        fig.update_yaxes(title_text=compound['nameDisplay'] + " (µg/m3)", row=compound['row'], col=compound['col'])
+        limit = get_limit(compound_config, operation)
+        max_val = data[compound_name].max()
 
-    fig.update_layout(height=800)
+        if limit is not None and (float(limit) / float(max_val)) <= 3:
+            fig.add_hline(
+                y=limit,
+                line_dash='dot',
+                row=row,
+                col=col,
+                line_color="#FF0000",
+                line_width=2
+            )
+
+        fig.update_xaxes(title_text="Дата", row=row, col=col)
+        fig.update_yaxes(title_text=compound_config['nameDisplay'] + " (µg/m3)", row=row, col=col)
+
+        col += 1
+        if col > cols:
+            col = 1
+            row += 1
+
+    fig.update_layout(height=height)
 
     graph += fig.to_html(full_html=False, include_plotlyjs='cdn')
     return graph
 
 
-def main():
-    config = read_config()
-
+def generate_html(config: dict, version_config: dict):
     graphs = ""
     for operation in ['mean', 'max']:
-        graphs += make_graph(config, operation)
+        graphs += make_graph(
+            config=config,
+            operation=operation,
+            rows=version_config['rows'],
+            cols=version_config['cols'],
+            height=version_config['height']
+        )
 
-    with open("templates/index_empty.html", 'r', encoding="UTF8") as f:
+    with open("templates/{filename}".format(filename=version_config['template']), 'r', encoding="UTF8") as f:
         content = f.read()
+        soup = bs4.BeautifulSoup(content, "html.parser")
 
-    content = content.format(graphs=graphs)
+    graphs_soup = bs4.BeautifulSoup(graphs, "html.parser")
 
-    with open("templates/index.html", 'w', encoding="UTF8") as f:
-        f.write(content)
+    soup.body.append(graphs_soup)
+
+    with open("templates/{filename}".format(filename=version_config['output']), 'w', encoding="UTF8") as f:
+        f.write(str(soup))
         f.flush()
+
+
+def main():
+    desktop_version = {
+        'rows': 3,
+        'cols': 3,
+        'height': 800,
+        'template': 'desktop_template.html',
+        'output': 'index.html'
+    }
+
+    mobile_version = {
+        'rows': 7,
+        'cols': 1,
+        'height': 2500,
+        'template': 'mobile_template.html',
+        'output': 'index_mobile.html'
+
+    }
+
+    config = read_config()
+
+    generate_html(config, desktop_version)
+    generate_html(config, mobile_version)
 
 
 if __name__ == "__main__":
