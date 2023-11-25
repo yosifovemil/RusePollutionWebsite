@@ -4,10 +4,12 @@ from plotly.subplots import make_subplots
 import json
 import numpy as np
 import bs4
+import os
 
 
 def read_config() -> dict:
-    with open("config.json", 'r', encoding="UTF8") as f:
+    config_file = os.path.join(os.path.expanduser("~"), "Config", "RusePollutionWebsite.json")
+    with open(config_file, 'r', encoding="UTF8") as f:
         config = json.load(f)
 
     return config
