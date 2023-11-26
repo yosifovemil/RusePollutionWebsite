@@ -21,7 +21,24 @@ def get_title(compound_config: CompoundConfig, operation: str):
     return title
 
 
-def make_graph(compound_config: CompoundConfig, operation: str, raw_data: pd.DataFrame) -> str:
+def build_tooltip(operation: str, title: str):
+    html = """
+    <div class='tooltip_{operation}'>
+        <a href='javascript:;'><h2>{title}</h2></a>
+        <p class='tooltiptext'>{text}</p>
+    </div>
+    """
+
+    text = ""
+    if operation == "mean":
+        text += "Станцията на Линамар предоставя измервания на всеки 30 минути. Графиката показва осреднената стойност от тези измервания за период от 24 часа."
+    elif operation == "max":
+        text += "Станцията на Линамар предоставя измервания на всеки 30 минути. Графиката показва максималната стойност от тези измервания за период от 24 часа."
+
+    return html.format(title=title, text=text, operation=operation)
+
+
+def build_plot_title(operation: str, compound_config: CompoundConfig):
     title = ""
     if operation == "mean":
         title = "Средни денонощни стойности"
@@ -32,7 +49,13 @@ def make_graph(compound_config: CompoundConfig, operation: str, raw_data: pd.Dat
     if limit is not None:
         title += " - лимит {limit} µg/m3".format(limit=limit)
 
-    graph = "<h2>{title}</h2>".format(title=title)
+    title = build_tooltip(operation, title)
+
+    return title
+
+
+def make_graph(compound_config: CompoundConfig, operation: str, raw_data: pd.DataFrame) -> str:
+    graph = build_plot_title(operation, compound_config)
 
     modebar = go.layout.Modebar(remove=("lasso", "lasso2d", "select", "select2d"))
 
@@ -68,9 +91,6 @@ def make_graph(compound_config: CompoundConfig, operation: str, raw_data: pd.Dat
             line_color="#FF0000",
             line_width=2
         )
-
-    # fig.update_xaxes(title_text="Дата")
-    # fig.update_yaxes(title_text=compound_config.get_name_display() + " (µg/m3)")
 
     graph += fig.to_html(full_html=False, include_plotlyjs='cdn')
     return graph

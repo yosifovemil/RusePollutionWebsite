@@ -1,6 +1,6 @@
-.tooltip .tooltiptext {
+.tooltiptext {
   visibility: hidden;
-  width: 570px;
+  width: 100%;
   background-color: black;
   color: #fff;
   text-align: center;
@@ -8,4 +8,8 @@
   padding: 5px 0;
   position: absolute;
   z-index: 1;
+}
+
+a:link {
+  color: #080547;
 }
