@@ -12,7 +12,7 @@ body{
 .btn{
   position: absolute;
     top: 10px;
-    left: 45px;
+    left: 10px;
     height: 37px;
     width: 37px;
     text-align: center;
@@ -47,10 +47,11 @@ body{
   color: white;
   font-size: 19px;
   font-weight: 600;
-  line-height: 65px;
   text-align: center;
+  line-height: 40px;
   background: #1e1e1e;
   letter-spacing: 1px;
+  padding-bottom: 15px;
 }
 nav ul{
   background: #1b1b1b;

@@ -34,8 +34,17 @@ def make_graph(compound_config: CompoundConfig, operation: str, raw_data: pd.Dat
 
     graph = "<h2>{title}</h2>".format(title=title)
 
-    fig = go.Figure(layout=go.Layout(margin=dict(r=10, l=10, t=30, b=10)))
-    fig.update_layout(showlegend=False)
+    modebar = go.layout.Modebar(remove=("lasso", "lasso2d", "select", "select2d"))
+
+    layout = go.Layout(
+        margin=dict(r=10, l=10, t=30, b=10),
+        xaxis={'fixedrange': True, 'title': 'Дата'},
+        yaxis={'fixedrange': True, 'title': compound_config.get_name_display() + " (µg/m3)"},
+        showlegend=False,
+        modebar=modebar
+    )
+
+    fig = go.Figure(layout=layout)
 
     data = analysis.perform_analysis(raw_data, operation, compound_config)
 
@@ -60,8 +69,8 @@ def make_graph(compound_config: CompoundConfig, operation: str, raw_data: pd.Dat
             line_width=2
         )
 
-    fig.update_xaxes(title_text="Дата")
-    fig.update_yaxes(title_text=compound_config.get_name_display() + " (µg/m3)")
+    # fig.update_xaxes(title_text="Дата")
+    # fig.update_yaxes(title_text=compound_config.get_name_display() + " (µg/m3)")
 
     graph += fig.to_html(full_html=False, include_plotlyjs='cdn')
     return graph
