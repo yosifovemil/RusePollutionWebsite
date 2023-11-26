@@ -1,8 +1,8 @@
 .tooltiptext {
   visibility: hidden;
   width: 100%;
+  color: #FC5404 !important;
   background-color: black;
-  color: #fff;
   text-align: center;
   border-radius: 6px;
   padding: 5px 0;
