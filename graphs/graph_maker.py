@@ -34,7 +34,7 @@ def make_graph(compound_config: CompoundConfig, operation: str, raw_data: pd.Dat
 
     graph = "<h2>{title}</h2>".format(title=title)
 
-    fig = go.Figure()
+    fig = go.Figure(layout=go.Layout(margin=dict(r=10, l=10, t=30, b=10)))
     fig.update_layout(showlegend=False)
 
     data = analysis.perform_analysis(raw_data, operation, compound_config)
