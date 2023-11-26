@@ -41,3 +41,8 @@ def toluene():
 @views.route("/XYLENE")
 def xylene():
     return render_template("XYLENE.html")
+
+
+@views.route("/help")
+def help():
+    return render_template("help.html")

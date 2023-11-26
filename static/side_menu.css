@@ -55,7 +55,6 @@ body{
 }
 nav ul{
   background: #1b1b1b;
-  height: 100%;
   width: 100%;
   list-style: none;
       padding-left: 10px;
@@ -137,16 +136,7 @@ nav ul li a span{
 nav ul li a span.rotate{
   transform: translateY(-50%) rotate(-180deg);
 }
-.content{
-  position:absolute;
-  top: 5%;
-  left: 0;
-  right: 0;
-  margin-left: auto;
-  margin-right: auto;
-  width: 97%;
-  max-width: 100em;
-  color: #202020;
-  z-index: -1;
-  text-align: center;
+.bottom_side {
+    position: absolute;
+    bottom: 0;
 }
