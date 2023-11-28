@@ -38,12 +38,6 @@ def exceptions(e):
     return e.status_code
 
 
-@views.before_request
-def before_request():
-    timestamp = strftime('[%Y-%b-%d %H:%M]: ')
-    logger.info('%s %s %s %s %s', timestamp, request.remote_addr, request.method, request.scheme, request.full_path)
-
-
 @views.route("/")
 def index():
     return render_template("NAPHTALENE.html")
