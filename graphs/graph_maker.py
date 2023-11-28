@@ -64,7 +64,9 @@ def make_graph(compound_config: CompoundConfig, operation: str, raw_data: pd.Dat
         xaxis={'fixedrange': True, 'title': 'Дата'},
         yaxis={'fixedrange': True, 'title': compound_config.get_name_display() + " (µg/m3)"},
         showlegend=False,
-        modebar=modebar
+        modebar=modebar,
+        dragmode=False,
+        clickmode="select"
     )
 
     fig = go.Figure(layout=layout)
@@ -98,6 +100,7 @@ def make_graph(compound_config: CompoundConfig, operation: str, raw_data: pd.Dat
 
 def generate_html(compound_config: CompoundConfig, raw_data: pd.DataFrame):
     graphs = "<h1>{compound}</h1>".format(compound=compound_config.get_name_display())
+
     for operation in ['mean', 'max']:
         graphs += make_graph(
             compound_config=compound_config,
@@ -111,10 +114,14 @@ def generate_html(compound_config: CompoundConfig, raw_data: pd.DataFrame):
     with open(html_input, 'r', encoding="UTF8") as f:
         content = f.read()
 
+    download_link = "<a class='download_link' href='/download/{compound_name}'>Всички измервания <img src='static/images/download-csv-icon.svg'></img></a>".format(
+        compound_name=compound_config.get_name())
+
     soup = bs4.BeautifulSoup(content, "html.parser")
-
     graphs_soup = bs4.BeautifulSoup(graphs, "html.parser")
+    download_link_soup = bs4.BeautifulSoup(download_link, "html.parser")
 
+    soup.find(attrs={"id": "download"}).append(download_link_soup)
     soup.find("div", {"class", "content"}).append(graphs_soup)
     soup.find(attrs={"id": compound_config.get_name()})['class'] = "active"
 

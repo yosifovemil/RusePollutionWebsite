@@ -1,6 +1,10 @@
+body {
+  -webkit-tap-highlight-color: transparent;
+}
+
 .content{
   position:absolute;
-  top: 5%;
+  top: 10px;
   left: 0;
   right: 0;
   margin-left: auto;
@@ -50,4 +54,20 @@
   display: block;
   width: 100%;
   max-width: 50em;
+}
+
+#download {
+  clear: both;
+}
+
+.download_link img {
+  width: 2em;
+}
+
+h1 {
+    font-size: 1.5em;
+}
+
+h2 {
+    font-size: 1.1em;
 }
