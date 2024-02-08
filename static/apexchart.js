@@ -9,7 +9,8 @@ $(document).ready(function(){
             }
         },
         stroke: {
-            curve: 'straight'
+            curve: 'straight',
+            width: 3.5
         },
         title: {
             text: title_text,
