@@ -30,6 +30,9 @@ $(document).ready(function(){
             x: {
                 format: "dd/MMM/yyyy HH:mm"
             }
+        },
+        yaxis: {
+            min: 0
         }
     };
 
