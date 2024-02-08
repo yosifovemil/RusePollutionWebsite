@@ -11,6 +11,7 @@ class Config:
 
         self.db_path = Path(cfg['db'])
 
+
 def read_config() -> dict:
     with open(CONFIG_FILE_LOCATION, 'r', encoding="UTF8") as f:
         config = json.load(f)

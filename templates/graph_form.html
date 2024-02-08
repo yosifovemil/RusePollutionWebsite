@@ -8,64 +8,47 @@
     <link rel="stylesheet" href="static/side_menu.css">
     <link rel="stylesheet" href="static/tooltip.css">
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css">
+
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <script type="text/javascript" src="static/menu.js"></script>
     <script type="text/javascript" src="static/tooltip.js"></script>
-    <title>Данни от станция на Линамар Лайт Металс Русе ЕООД</title>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <script src="/static/apexchart.js"></script>
+
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet"/>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css"/>
+
+    <title>Данни от АИС станции, Русе</title>
 
     <script>
-        var subjectObject = {{ graph_choices|safe }}
-        window.onload = function() {
-            var subjectSel = document.getElementById("subject");
-            var topicSel = document.getElementById("topic");
-            var chapterSel = document.getElementById("chapter");
-            for (var x in subjectObject) {
-                subjectSel.options[subjectSel.options.length] = new Option(x, x);
-            }
-            subjectSel.onchange = function() {
-                //empty Chapters- and Topics- dropdowns
-                chapterSel.length = 1;
-                topicSel.length = 1;
-                //display correct values
-                for (var y in subjectObject[this.value]) {
-                  topicSel.options[topicSel.options.length] = new Option(y, y);
-                }
-            }
-            topicSel.onchange = function() {
-            //empty Chapters dropdown
-            chapterSel.length = 1;
-            //display correct values
-            var z = subjectObject[subjectSel.value][this.value];
-            for (var i = 0; i < z.length; i++) {
-              chapterSel.options[chapterSel.options.length] = new Option(z[i], z[i]);
-            }
-}
-        }
+        var y_vals = {{ graph.y_vals | safe }}
+        var x_vals = {{ graph.x_vals | safe }}
+        var chart_type = "{{ graph.chart_type | safe }}"
+        var title_text = "{{ graph.title_text | safe }}"
     </script>
-
+    <script>
+        $(document).ready(function() {
+            $('.measurement').select2();
+            $('input[name="dates"]').daterangepicker({
+                "locale": {
+                    "format": "DD/MM/YYYY"
+                }
+            });
+        });
+    </script>
 
 </head>
 <body>
 
-<div class="btn">
-    <span class="fas fa-bars"></span>
-</div>
-
-{{ menu|safe }}
-
 <div class="content">
-    <form action=/graph?page={{ page|safe }} method="post">
-        <select name="interval" id="inverval">
-            <option value="Средноденонощна стойност">Средноденонощна стойност</option>
-            <option value="Средночасова стойност">Средночасова стойност</option>
-        </select>
-        <input type="date" id="start" name="start_date" value={{ start_date|safe }}>
-        <input type="date" id="end" name="end_date" value={{ end_date|safe }}>
-        <br>
-        <input type="submit" value="Submit">
-    </form>
 
-    {{ graph|safe }}
+    {{ form|safe }}
+
+    <div id="plot"></div>
 
 </div>
 

@@ -36,7 +36,7 @@ def summarise_to_interval(data: pd.DataFrame, old_interval: str, new_interval: s
     else:
         return data
 
-    data.date = pd.to_datetime(data.date.dt.strftime(format), format=format)
+    data['date'] = pd.to_datetime(data.date.dt.strftime(format), format=format)
     data = data.groupby(['date'], as_index=False).value.mean()
 
     return data

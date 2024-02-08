@@ -5,8 +5,7 @@ import logging
 
 import pandas as pd
 
-from graphs.config import Config
-from utils import formats
+from config import Config
 from utils.singleton import Singleton
 
 apsw.bestpractice.apply(apsw.bestpractice.recommended)
