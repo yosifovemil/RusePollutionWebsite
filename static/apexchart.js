@@ -24,6 +24,11 @@ $(document).ready(function(){
         xaxis: {
             type: 'datetime',
             categories: x_vals
+        },
+        tooltip: {
+            x: {
+                format: "dd/MMM/yyyy HH:mm"
+            }
         }
     };
 
