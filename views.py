@@ -1,19 +1,18 @@
 import logging
 import os
 import traceback
-from datetime import datetime, timedelta
 from logging.handlers import RotatingFileHandler
 from time import strftime
 
 from flask import Blueprint, render_template, request
 
-import utils.formats as formats
 from config import Config
 from database.website_db import WebsiteDB
 from graph import graph_generator
 from graph.graph_picker import GraphPicker
 from graph.interval import *
 from static.form import form_builder
+from utils.graph_util import parse_date_range
 
 views = Blueprint(__name__, "views")
 
@@ -51,7 +50,7 @@ def exceptions(e):
 def graph():
     measurement = request.values.get("measurement", default="Бензен")
     raw_dates = request.values.get("dates", default="01/12/2023 - 10/12/2023")
-    start_date, end_date = parse_dates(raw_dates)
+    start_date, end_date = parse_date_range(raw_dates)
 
     interval = request.values.get("interval", default=INTERVAL_DAILY)
     if interval not in VALID_INTERVALS:
@@ -72,11 +71,3 @@ def graph():
         start_date=start_date,
         end_date=end_date
     )
-
-
-def parse_dates(dates: str) -> tuple[str, str]:
-    dates_str = dates.split("-")
-    start_date = datetime.strptime(dates_str[0].strip(), "%d/%m/%Y")
-    end_date = datetime.strptime(dates_str[1].strip(), "%d/%m/%Y") + timedelta(days=1)
-
-    return start_date.strftime(formats.date_format), end_date.strftime(formats.date_format)
