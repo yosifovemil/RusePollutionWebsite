@@ -6,15 +6,16 @@ import logging
 import pandas as pd
 
 from config import Config
+from database.client import DBClient
+from utils.singleton import Singleton
 
 apsw.bestpractice.apply(apsw.bestpractice.recommended)
 
 
-class DBClient():
+class DataDB(metaclass=Singleton,DBClient):
 
     def __init__(self):
-        config = Config()
-        self.db = setup_connection(config.db_path)
+        super().__init__()
         self.graph_picker_query = read_file(Path("database/sql/graph_picker_choices.sql"))
 
     def run_query(self, query: str) -> pd.DataFrame:
