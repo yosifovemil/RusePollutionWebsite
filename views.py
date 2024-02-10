@@ -1,19 +1,19 @@
-from typing import Tuple
+import logging
+import os
+import traceback
+from datetime import datetime, timedelta
+from logging.handlers import RotatingFileHandler
+from time import strftime
 
 from flask import Blueprint, render_template, request
 
+import utils.formats as formats
+from config import Config
+from database.website_db import WebsiteDB
+from graph import graph_generator
 from graph.graph_picker import GraphPicker
 from graph.interval import *
-from config import Config
-import logging
-from logging.handlers import RotatingFileHandler
-from time import strftime
-import traceback
-import os
-from graph import graph_generator
 from static.form import form_builder
-from datetime import datetime, timedelta
-import utils.formats as formats
 
 views = Blueprint(__name__, "views")
 
@@ -27,6 +27,7 @@ logger.addHandler(handler)
 # Config
 config = Config()
 graph_picker = GraphPicker()
+website_db = WebsiteDB()
 
 
 @views.after_request

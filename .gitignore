@@ -163,3 +163,4 @@ csv
 *json
 templates/*.html
 .idea
+website_config
