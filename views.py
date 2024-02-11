@@ -1,13 +1,13 @@
 import logging
 import os
 import secrets
-from urllib.parse import urlencode
 import traceback
 from logging.handlers import RotatingFileHandler
 from time import strftime
-import requests
+from urllib.parse import urlencode
 
-from flask import Blueprint, render_template, request, session, url_for, redirect, flash, abort
+import requests
+from flask import Blueprint, render_template, request, session, url_for, redirect, abort
 
 from config import Config
 from database.website_db import WebsiteDB
@@ -76,14 +76,14 @@ def graph():
     )
 
 
-@views.route("/authorize")
-def authorize():
+@views.route("/login")
+def login():
     session['oauth2_state'] = secrets.token_urlsafe(16)
 
     qs = urlencode({
         'client_id': config.google_secret['client_id'],
         'redirect_uri': url_for(
-            'views.authorize_callback',
+            'views.login_callback',
             _external=True
         ),
         'response_type': 'code',
@@ -94,8 +94,8 @@ def authorize():
     return redirect("https://accounts.google.com/o/oauth2/auth?" + qs)
 
 
-@views.route("/authorize_callback")
-def authorize_callback():
+@views.route("/login_callback")
+def login_callback():
     if 'error' in request.args:
         print("GOT ERROR:")
         for k, v in request.args.items():
@@ -110,7 +110,7 @@ def authorize_callback():
 
     # make sure that the authorization code is present
     if 'code' not in request.args:
-        print("NO code found args")
+        print("No code found args")
         abort(401)
 
     # exchange the authorization code for an access token
@@ -119,7 +119,7 @@ def authorize_callback():
         'client_secret': config.google_secret['client_secret'],
         'code': request.args['code'],
         'grant_type': 'authorization_code',
-        'redirect_uri': url_for('views.authorize_callback', _external=True),
+        'redirect_uri': url_for('views.login_callback', _external=True),
     }, headers={'Accept': 'application/json'})
 
     print("GOOGLE RESPONSE:")
