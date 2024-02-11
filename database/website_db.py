@@ -15,10 +15,18 @@ class WebsiteDB(DBClient):
         self.db_bootstrap = read_file(Path("database/sql/bootstrap_website_db.sql"))
         self.db = self.setup_connection(db_location=self.config.website_db_path, bootstrap_query=self.db_bootstrap)
 
-    def update_user(self):
-        # TODO update user's values with info from their Google account
-        pass
+    def update_user(self, user: dict):
+        query = f"""
+        UPDATE Users
+        SET name = '{user['name']}',
+            photo = '{user['photo']}',
+            registered = '{user['registered']}'
+        WHERE 
+            email = '{user['email']}'
+        """
 
-    def get_user(self):
-        # TODO get user info from DB
-        pass
+        self.run_query(query=query)
+
+    def get_user(self, email: str):
+        query = f"SELECT * FROM Users WHERE email = '{email}'"
+        return self.select_single_row(query)

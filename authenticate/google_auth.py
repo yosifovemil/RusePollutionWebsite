@@ -2,10 +2,11 @@ from urllib.parse import urlencode
 
 import requests
 
-USERINFO_SCOPE = 'https://www.googleapis.com/auth/userinfo.email'
+USERINFO_SCOPES = ['https://www.googleapis.com/auth/userinfo.email', 'https://www.googleapis.com/auth/userinfo.profile']
 AUTH_ENDPOINT = 'https://accounts.google.com/o/oauth2/auth?'
 TOKEN_ENDPOINT = 'https://accounts.google.com/o/oauth2/token'
 USERINFO_ENDPOINT = 'https://www.googleapis.com/oauth2/v3/userinfo'
+PROFILE_ENDPOINT = ''
 
 
 class GoogleAuth:
@@ -17,7 +18,7 @@ class GoogleAuth:
             'client_id': self.google_secret['client_id'],
             'redirect_uri': redirect_uri,
             'response_type': 'code',
-            'scope': USERINFO_SCOPE,
+            'scope': ' '.join(USERINFO_SCOPES),
             'state': oauth2_state
         })
 

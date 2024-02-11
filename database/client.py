@@ -15,6 +15,27 @@ class DBClient:
     def __init__(self):
         self.config = Config()
 
+    def run_query(self, query: str):
+        cursor = self.db.execute(query)
+        return [row for row in cursor]
+
+    def select_single_row(self, query: str):
+        cursor = self.db.execute(query)
+        columns = [description[0] for description in cursor.description]
+        rows = [row for row in cursor]
+
+        if len(rows) == 0:
+            return None
+        elif len(rows) > 1:
+            raise Exception("More than 1 results found")
+        else:
+            values = rows[0]
+            result = {}
+            for key, val in zip(columns, values):
+                result[key] = val
+
+            return result
+
     def select_query(self, query: str) -> pd.DataFrame:
         cursor = self.db.execute(query)
         columns = [description[0] for description in cursor.description]

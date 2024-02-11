@@ -4,9 +4,7 @@ import secrets
 import traceback
 from logging.handlers import RotatingFileHandler
 from time import strftime
-from urllib.parse import urlencode
 
-import requests
 from flask import Blueprint, render_template, request, session, url_for, redirect, abort, Request
 
 from authenticate.google_auth import GoogleAuth
@@ -96,11 +94,27 @@ def login_callback():
         abort(401)
 
     try:
-        return google_auth.get_user_info(
+        user_info = google_auth.get_user_info(
             auth_code=request.args['code'],
             redirect_uri=__get_redirect_uri()
         )
-    except Exception as e:
+
+        user = website_db.get_user(user_info['email'])
+        if user is None:
+            logging.warning(f"Invalid login attempt:\n{user_info}")
+        elif not bool(user['registered']):
+            updated_user = {
+                'email': user['email'],
+                'name': user_info['name'],
+                'photo': user_info['picture'],
+                'registered': 1
+            }
+            website_db.update_user(updated_user)
+            return f"Registered in database:<br />{user}"
+        else:
+            return f"Welcome back {user['name']}."
+
+    except Exception:
         abort(401)
 
 
@@ -117,7 +131,6 @@ def __validate_login_callback_request(request: Request) -> bool:
         logger.error(f"Received wrong state: {request.args['state']}")
         return False
 
-    # make sure that the authorization code is present
     if 'code' not in request.args:
         logger.error("Value 'code' not found in request")
         return False
