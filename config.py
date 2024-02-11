@@ -17,11 +17,12 @@ class Config:
         if not os.path.exists(CONFIG_FILE_LOCATION):
             with open(CONFIG_FILE_LOCATION, 'w', encoding="UTF8") as f:
                 f.write(json.dumps(CONFIG_TEMPLATE, indent=2))
-        website_config = read_config(CONFIG_FILE_LOCATION)
-        google_secret = read_config(GOOGLE_SECRET_LOCATION)
 
+        website_config = read_config(CONFIG_FILE_LOCATION)
         self.data_db_path = Path(website_config['data_db'])
         self.website_db_path = Path(website_config['website-db'])
+
+        self.google_secret = read_config(GOOGLE_SECRET_LOCATION)['web']
 
 
 def read_config(file_location: str) -> dict:

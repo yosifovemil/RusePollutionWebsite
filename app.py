@@ -3,6 +3,7 @@ from views import views
 from waitress import serve
 
 app = Flask(__name__)
+app.config['SECRET_KEY'] = 'top secret!'  # TODO do better
 app.register_blueprint(views, url_prefix="/")
 app.config['TEMPLATES_AUTO_RELOAD'] = True
 

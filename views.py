@@ -1,10 +1,13 @@
 import logging
 import os
+import secrets
+from urllib.parse import urlencode
 import traceback
 from logging.handlers import RotatingFileHandler
 from time import strftime
+import requests
 
-from flask import Blueprint, render_template, request
+from flask import Blueprint, render_template, request, session, url_for, redirect, flash, abort
 
 from config import Config
 from database.website_db import WebsiteDB
@@ -71,3 +74,70 @@ def graph():
         start_date=start_date,
         end_date=end_date
     )
+
+
+@views.route("/authorize")
+def authorize():
+    session['oauth2_state'] = secrets.token_urlsafe(16)
+
+    qs = urlencode({
+        'client_id': config.google_secret['client_id'],
+        'redirect_uri': url_for(
+            'views.authorize_callback',
+            _external=True
+        ),
+        'response_type': 'code',
+        'scope': 'https://www.googleapis.com/auth/userinfo.email',
+        'state': session['oauth2_state']
+    })
+
+    return redirect("https://accounts.google.com/o/oauth2/auth?" + qs)
+
+
+@views.route("/authorize_callback")
+def authorize_callback():
+    if 'error' in request.args:
+        print("GOT ERROR:")
+        for k, v in request.args.items():
+            if k.startswith('error'):
+                print(f'{k}: {v}')
+
+    # make sure that the state parameter matches the one we created in the
+    # authorization request
+    if request.args['state'] != session.get('oauth2_state'):
+        print("STATE IS WRONG")
+        abort(401)
+
+    # make sure that the authorization code is present
+    if 'code' not in request.args:
+        print("NO code found args")
+        abort(401)
+
+    # exchange the authorization code for an access token
+    response = requests.post("https://accounts.google.com/o/oauth2/token", data={
+        'client_id': config.google_secret['client_id'],
+        'client_secret': config.google_secret['client_secret'],
+        'code': request.args['code'],
+        'grant_type': 'authorization_code',
+        'redirect_uri': url_for('views.authorize_callback', _external=True),
+    }, headers={'Accept': 'application/json'})
+
+    print("GOOGLE RESPONSE:")
+    print(response)
+
+    if response.status_code != 200:
+        abort(401)
+    oauth2_token = response.json().get('access_token')
+    if not oauth2_token:
+        abort(401)
+
+    # use the access token to get the user's email address
+    response = requests.get('https://www.googleapis.com/oauth2/v3/userinfo', headers={
+        'Authorization': 'Bearer ' + oauth2_token,
+        'Accept': 'application/json',
+    })
+
+    if response.status_code != 200:
+        abort(401)
+
+    return response.json()
