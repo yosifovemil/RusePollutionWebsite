@@ -7,8 +7,9 @@ from time import strftime
 from urllib.parse import urlencode
 
 import requests
-from flask import Blueprint, render_template, request, session, url_for, redirect, abort
+from flask import Blueprint, render_template, request, session, url_for, redirect, abort, Request
 
+from authenticate.google_auth import GoogleAuth
 from config import Config
 from database.website_db import WebsiteDB
 from graph import graph_generator
@@ -30,6 +31,7 @@ logger.addHandler(handler)
 config = Config()
 graph_picker = GraphPicker()
 website_db = WebsiteDB()
+google_auth = GoogleAuth(google_secret=config.google_secret)
 
 
 @views.after_request
@@ -80,64 +82,48 @@ def graph():
 def login():
     session['oauth2_state'] = secrets.token_urlsafe(16)
 
-    qs = urlencode({
-        'client_id': config.google_secret['client_id'],
-        'redirect_uri': url_for(
-            'views.login_callback',
-            _external=True
-        ),
-        'response_type': 'code',
-        'scope': 'https://www.googleapis.com/auth/userinfo.email',
-        'state': session['oauth2_state']
-    })
+    login_redirect = google_auth.login_redirect(
+        oauth2_state=session['oauth2_state'],
+        redirect_uri=__get_redirect_uri()
+    )
 
-    return redirect("https://accounts.google.com/o/oauth2/auth?" + qs)
+    return redirect(login_redirect)
 
 
 @views.route("/login_callback")
 def login_callback():
+    if not __validate_login_callback_request(request=request):
+        abort(401)
+
+    try:
+        return google_auth.get_user_info(
+            auth_code=request.args['code'],
+            redirect_uri=__get_redirect_uri()
+        )
+    except Exception as e:
+        abort(401)
+
+
+def __validate_login_callback_request(request: Request) -> bool:
     if 'error' in request.args:
-        print("GOT ERROR:")
+        logger.error("Received error(s) from Google authorization:")
         for k, v in request.args.items():
             if k.startswith('error'):
-                print(f'{k}: {v}')
+                logger.error(f'{k}: {v}')
 
-    # make sure that the state parameter matches the one we created in the
-    # authorization request
+        return False
+
     if request.args['state'] != session.get('oauth2_state'):
-        print("STATE IS WRONG")
-        abort(401)
+        logger.error(f"Received wrong state: {request.args['state']}")
+        return False
 
     # make sure that the authorization code is present
     if 'code' not in request.args:
-        print("No code found args")
-        abort(401)
+        logger.error("Value 'code' not found in request")
+        return False
 
-    # exchange the authorization code for an access token
-    response = requests.post("https://accounts.google.com/o/oauth2/token", data={
-        'client_id': config.google_secret['client_id'],
-        'client_secret': config.google_secret['client_secret'],
-        'code': request.args['code'],
-        'grant_type': 'authorization_code',
-        'redirect_uri': url_for('views.login_callback', _external=True),
-    }, headers={'Accept': 'application/json'})
+    return True
 
-    print("GOOGLE RESPONSE:")
-    print(response)
 
-    if response.status_code != 200:
-        abort(401)
-    oauth2_token = response.json().get('access_token')
-    if not oauth2_token:
-        abort(401)
-
-    # use the access token to get the user's email address
-    response = requests.get('https://www.googleapis.com/oauth2/v3/userinfo', headers={
-        'Authorization': 'Bearer ' + oauth2_token,
-        'Accept': 'application/json',
-    })
-
-    if response.status_code != 200:
-        abort(401)
-
-    return response.json()
+def __get_redirect_uri():
+    return url_for('views.login_callback', _external=True)
