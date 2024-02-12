@@ -27,6 +27,10 @@ class WebsiteDB(DBClient):
 
         self.run_query(query=query)
 
-    def get_user(self, email: str):
+    def lookup_user(self, email: str):
         query = f"SELECT * FROM Users WHERE email = '{email}'"
+        return self.select_single_row(query)
+
+    def get_user(self, id):
+        query = f"SELECT * FROM Users WHERE id = '{id}'"
         return self.select_single_row(query)

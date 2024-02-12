@@ -8,6 +8,9 @@ CONFIG_FILE_LOCATION = os.path.join(
 GOOGLE_SECRET_LOCATION = os.path.join(
     os.path.expanduser("~"), "Config", "RusePollutionWebsite", "client_secret.json"
 )
+WEBSITE_SECRET_LOCATION = os.path.join(
+    os.path.expanduser("~"), "Config", "RusePollutionWebsite", "website_secret.txt"
+)
 
 CONFIG_TEMPLATE = {'data_db': "", 'website-db': ""}
 
@@ -23,6 +26,7 @@ class Config:
         self.website_db_path = Path(website_config['website-db'])
 
         self.google_secret = read_config(GOOGLE_SECRET_LOCATION)['web']
+        self.website_secret = read_file(WEBSITE_SECRET_LOCATION)
 
 
 def read_config(file_location: str) -> dict:
@@ -30,3 +34,10 @@ def read_config(file_location: str) -> dict:
         config = json.load(f)
 
     return config
+
+
+def read_file(file_location: str) -> str:
+    with open(file_location, 'r', encoding="UTF-8") as f:
+        content = f.read()
+
+    return content
