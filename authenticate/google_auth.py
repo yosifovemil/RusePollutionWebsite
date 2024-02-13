@@ -6,7 +6,9 @@ USERINFO_SCOPES = ['https://www.googleapis.com/auth/userinfo.email', 'https://ww
 AUTH_ENDPOINT = 'https://accounts.google.com/o/oauth2/auth?'
 TOKEN_ENDPOINT = 'https://accounts.google.com/o/oauth2/token'
 USERINFO_ENDPOINT = 'https://www.googleapis.com/oauth2/v3/userinfo'
-PROFILE_ENDPOINT = ''
+
+
+
 
 
 class GoogleAuth:
