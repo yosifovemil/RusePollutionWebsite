@@ -2,10 +2,8 @@ import logging
 import os
 from logging.handlers import RotatingFileHandler
 
-from flask import Flask, url_for, render_template, session, jsonify, Blueprint
-from flask_pyoidc import OIDCAuthentication
-from flask_pyoidc.provider_configuration import ClientMetadata, ProviderConfiguration
-from flask_pyoidc.user_session import UserSession
+from authlib.integrations.flask_client import OAuth
+from flask import Flask, url_for, redirect, request
 from waitress import serve
 
 from config import Config
@@ -20,110 +18,42 @@ logger.addHandler(handler)
 
 config = Config()
 
+# Flask init
 app = Flask(__name__)
-
 app.register_blueprint(views, url_prefix="/")
-
 app.config.update(
-    OIDC_REDIRECT_URI="http://localhost:3000/login_callback",
     SECRET_KEY=config.website_secret,
-    TEMPLATES_AUTO_RELOAD=True
+    TEMPLATES_AUTO_RELOAD=True,
 )
 
-client_metadata = ClientMetadata(
+oauth = OAuth(app)
+oauth.register(
+    name="google",
     client_id=config.google_secret['client_id'],
     client_secret=config.google_secret['client_secret'],
-    post_logout_redirect_uris="http://localhost:3000/logout"
+    api_base_url='https://www.googleapis.com/',
+    userinfo_endpoint='https://openidconnect.googleapis.com/v1/userinfo',
+    authorize_url="https://accounts.google.com/o/oauth2/v2/auth",
+    access_token_url="https://oauth2.googleapis.com/token",
+    jwks_uri="https://www.googleapis.com/oauth2/v3/certs",
+    client_kwargs={'scope': 'openid email profile'}
 )
 
-provider_config = ProviderConfiguration(
-    issuer="https://accounts.google.com",
-    client_metadata=client_metadata
-)
 
-auth = OIDCAuthentication({'default': provider_config}, app)
-
-
-@app.route("/")
-def landing():
-    return render_template("landing.html")
-
-
-@app.route("/login")
-@auth.oidc_auth('default')
+@app.route('/login')
 def login():
-    user_session = UserSession(session)
-    return jsonify(access_token=user_session.access_token,
-                   id_token=user_session.id_token,
-                   userinfo=user_session.userinfo)
+    redirect_uri = url_for('login_callback', _external=True)
+    return oauth.google.authorize_redirect(redirect_uri)
 
 
-#
-#     session['oauth2_state'] = secrets.token_urlsafe(16)
-#
-#     login_redirect = google_auth.login_redirect(
-#         oauth2_state=session['oauth2_state'],
-#         redirect_uri=__get_redirect_uri()
-#     )
-#
-#     return redirect(login_redirect)
-#
-#
-# @auth.route("/login_callback")
-# def login_callback():
-#     if not __validate_login_callback_request(request=request):
-#         abort(401)
-#
-#     try:
-#         user_info = google_auth.get_user_info(
-#             auth_code=request.args['code'],
-#             redirect_uri=__get_redirect_uri()
-#         )
-#
-#         user = login_or_register(user_info, logger)
-#         if user is None:
-#             logger.warning(f"Invalid login attempt:\n{user_info}")
-#             abort(401)
-#         else:
-#             login_user(user)
-#
-#         return redirect(url_for("views.graph"))
-#
-#     except Exception:
-#         abort(401)
-#
-#
-@app.route("/logout")
-def logout():
-    return "Logged out"
-    # logout_user()
-    # return redirect(url_for("auth.landing"))
-
-
-#
-#
-# def __validate_login_callback_request(request: Request) -> bool:
-#     if 'error' in request.args:
-#         logger.error("Received error(s) from Google authorization:")
-#         for k, v in request.args.items():
-#             if k.startswith('error'):
-#                 logger.error(f'{k}: {v}')
-#
-#         return False
-#
-#     if request.args['state'] != session.get('oauth2_state'):
-#         logger.error(f"Received wrong state: {request.args['state']}")
-#         return False
-#
-#     if 'code' not in request.args:
-#         logger.error("Value 'code' not found in request")
-#         return False
-#
-#     return True
-#
-#
-# def __get_redirect_uri():
-#     return url_for('auth.login_callback', _external=True)
+@app.route('/login_callback')
+def login_callback():
+    token = oauth.google.authorize_access_token()
+    resp = oauth.google.post(f'/oauth2/v2/tokeninfo?access_token={token["access_token"]}&id_token={token["id_token"]}')
+    resp.raise_for_status()
+    profile = resp.json()
+    # do something with the token and profile
+    return redirect(url_for('views.graph'))
 
 
 if __name__ == "__main__":
