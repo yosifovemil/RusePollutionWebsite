@@ -10,3 +10,6 @@ class User(UserMixin):
 
 class Anonymous(AnonymousUserMixin):
     name = u"Anonymous"
+
+def build(user_dict: dict) -> User:
+    if ['']

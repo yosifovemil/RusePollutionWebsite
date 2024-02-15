@@ -25,7 +25,7 @@ def get_user(id):
         return user
 
 
-def login_or_register(user_info: dict, logger: Logger):
+def login_or_register(user_info: dict, logger: Logger) -> User | None:
     db_user = website_db.lookup_user(user_info['email'])
 
     if db_user is None:
@@ -35,13 +35,12 @@ def login_or_register(user_info: dict, logger: Logger):
             'email': db_user['email'],
             'name': user_info['name'],
             'photo': user_info['picture'],
-            'registered': 1
+            'registered': 1,
+            'admin': user_info['admin']
         }
         website_db.update_user(updated_user)
         logger.info(f"Registered user: ${updated_user}")
-        user = User(updated_user)
-        return user
+        return User(updated_user)
     else:
         logger.info(f"User ${db_user['email']} logged in")
-        user = User(db_user)
-        return user
+        return User(db_user)
