@@ -2,14 +2,28 @@ from flask_login import UserMixin, AnonymousUserMixin
 
 
 class User(UserMixin):
-    def __init__(self, user_dict: dict):
-        self.id = user_dict['id']
-        self.name = user_dict['name']
-        self.email = user_dict['email']
+    def __init__(self, user: dict):
+        self.id = user['id']
+        self.username = user['username']
+        self.password = user['password']
+        self.name = user['name']
+        self.photo = user['photo']
+        self.active = bool(user['active'])
+        self.admin = bool(user['admin'])
+        self.account_type = user['accountType']
+
+    def is_active(self):
+        return self.active
+
+    def is_authenticated(self):
+        return True
+
+    def is_anonymous(self):
+        return False
+
+    def get_id(self):
+        return self.id
 
 
 class Anonymous(AnonymousUserMixin):
     name = u"Anonymous"
-
-def build(user_dict: dict) -> User:
-    if ['']

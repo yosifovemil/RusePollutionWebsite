@@ -1,10 +1,9 @@
 import logging
-import secrets
 
 from flask import Blueprint, redirect, url_for, render_template, session, request, abort, Request
 from flask_login import logout_user, login_user
 from authlib.integrations.flask_client import OAuth
-from authenticate.google_login import login_or_register
+from authenticate.login import google_login, login
 from config import Config
 
 auth_blueprint = Blueprint(__name__, "auth")
@@ -41,9 +40,19 @@ def login_callback():
     token = oauth.google.authorize_access_token()
     resp = oauth.google.post(f'/oauth2/v2/tokeninfo?access_token={token["access_token"]}&id_token={token["id_token"]}')
     resp.raise_for_status()
-    profile = resp.json()
+    verified_info = resp.json()
 
+    user_info = {
+        'email': verified_info['email'],
+        'google_id': verified_info['user_id'],
+        'name': token['userinfo']['name'],
+        'photo': token['userinfo']['picture']
+    }
 
+    user = google_login(user_info=user_info, logger=logger)
 
-    print(profile)
-    return redirect(url_for('views.graph'))
+    if user is None:
+        return redirect(url_for(""))
+    else:
+        login_user(user)
+        return redirect(url_for('views.graph'))

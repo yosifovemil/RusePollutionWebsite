@@ -1,6 +1,7 @@
 import logging
 import os
 from pathlib import Path
+from typing import Dict, Any
 
 import apsw.bestpractice
 import pandas as pd
@@ -16,33 +17,34 @@ class DBClient:
         self.config = Config()
 
     def run_query(self, query: str):
-        cursor = self.db.execute(query)
-        return [row for row in cursor]
+        self.db.execute(query)
 
-    def select_single_row(self, query: str):
-        cursor = self.db.execute(query)
-        columns = [description[0] for description in cursor.description]
-        rows = [row for row in cursor]
+    def __extract_results(self, cursor: apsw.Connection) -> list:
+        headings = []
+        rows = []
+        for db_row in cursor:
+            if not headings:
+                headings = [desc[0] for desc in cursor.description]
 
+            row = dict(zip(headings, db_row))
+            rows.append(row)
+
+        return rows
+
+    def select_single_row(self, query: str) -> dict | None:
+        rows = self.__extract_results(self.db.execute(query))
         if len(rows) == 0:
             return None
         elif len(rows) > 1:
             raise Exception("More than 1 results found")
         else:
-            values = rows[0]
-            result = {}
-            for key, val in zip(columns, values):
-                result[key] = val
-
-            return result
+            return rows[0]
 
     def select_query(self, query: str) -> pd.DataFrame:
-        cursor = self.db.execute(query)
-        columns = [description[0] for description in cursor.description]
-        data = [row for row in cursor]
-        data_frame = pd.DataFrame(data, columns=columns)
+        data = self.__extract_results(self.db.execute(query))
+        data_frame = pd.DataFrame(data)
 
-        if 'date' in columns:
+        if 'date' in data_frame.columns:
             data_frame['date'] = pd.to_datetime(data_frame['date'], format="%Y-%m-%d %H:%M:%S")
 
         return data_frame

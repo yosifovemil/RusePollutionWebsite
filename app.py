@@ -6,6 +6,7 @@ from flask import Flask
 from waitress import serve
 
 from auth import oauth, auth_blueprint
+from authenticate.login import login_manager
 from config import Config
 from views import views
 
@@ -28,6 +29,7 @@ app.config.update(
 )
 
 oauth.init_app(app)
+login_manager.init_app(app)
 
 if __name__ == "__main__":
     serve(app, host='0.0.0.0', port=3000, threads=4)
