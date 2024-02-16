@@ -20,19 +20,40 @@
 </head>
 <body>
 <section class="login-block">
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-sm-12">
-                <div class="auth-box card">
-                    <a class="btn btn-outline-dark" href="/login" role="button" style="text-transform:none">
-                        <img width="20px" style="margin-bottom:3px; margin-right:5px" alt="Вход с Google"
-                             src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/1024px-Google_%22G%22_logo.svg.png"/>
-                        Вход с Google
-                    </a>
+    <form method='POST' action="/temp_user_login">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="auth-box card">
+                        <div class="card-block">
+                            <label for="username">Потребител</label>
+                            <input type="text" class="form-control" id="username" name="username"
+                                   placeholder="Потребител">
+                        </div>
+
+                        <div class="card-block">
+                            <label for="password">Парола</label>
+                            <input type="password" class="form-control" id="password" name="password"
+                                   placeholder="Парола">
+                        </div>
+
+                        <div class="card-block">
+                            <button type="submit" class="btn btn-outline-dark form-control">Вход</button>
+                        </div>
+
+                        <div class="card-block">
+                            <a class="btn btn-outline-dark form-control" href="/login" role="button"
+                               style="text-transform:none">
+                                <img width="20px" style="margin-bottom:3px; margin-right:5px" alt="Вход с Google"
+                                     src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/1024px-Google_%22G%22_logo.svg.png"/>
+                                Вход с Google
+                            </a>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
+    </form>
 </section>
 
 

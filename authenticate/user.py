@@ -5,7 +5,7 @@ class User(UserMixin):
     def __init__(self, user: dict):
         self.id = user['id']
         self.username = user['username']
-        self.password = user['password']
+        self.password = bytes(user['password'], encoding="UTF-8")
         self.name = user['name']
         self.photo = user['photo']
         self.active = bool(user['active'])

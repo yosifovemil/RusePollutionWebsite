@@ -3,7 +3,8 @@ import logging
 from flask import Blueprint, redirect, url_for, render_template, session, request, abort, Request
 from flask_login import logout_user, login_user
 from authlib.integrations.flask_client import OAuth
-from authenticate.login import google_login, login
+from authenticate.login import google_login, temp_user_login
+from authenticate.user import User
 from config import Config
 
 auth_blueprint = Blueprint(__name__, "auth")
@@ -50,7 +51,24 @@ def login_callback():
     }
 
     user = google_login(user_info=user_info, logger=logger)
+    return redirect_after_login(user)
 
+
+@auth_blueprint.route("/temp_user_login", methods=['POST'])
+def temp_login():
+    username = request.values.get("username")
+    password = request.values.get("password")
+
+    user = temp_user_login(username=username, password=password)
+    return redirect_after_login(user)
+
+
+@auth_blueprint.route("/logout")
+def logout():
+    logout_user()
+
+
+def redirect_after_login(user: User):
     if user is None:
         return redirect(url_for(""))
     else:

@@ -1,6 +1,7 @@
 import copy
 from logging import Logger
 
+import bcrypt
 from flask_login import LoginManager
 
 from authenticate.user import Anonymous, User
@@ -43,5 +44,14 @@ def google_login(user_info: dict, logger: Logger) -> User | None:
             return db_user
 
 
-def login(user_info: dict) -> User | None:
-    pass
+def temp_user_login(username: str, password: str) -> User | None:
+    db_user = website_db.lookup_user(username)
+    password_b = bytes(password, encoding="UTF-8")
+
+    if db_user is None:
+        return db_user
+
+    if db_user.active and bcrypt.checkpw(password_b, db_user.password):
+        return db_user
+    else:
+        return None
