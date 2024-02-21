@@ -19,6 +19,10 @@ body {
     color: white !important;
 }
 
+.select2-container--default {
+    width: 100% !important;
+}
+
 .select2-container .select2-selection--single {
     height: 100% !important;
     text-align: center;
