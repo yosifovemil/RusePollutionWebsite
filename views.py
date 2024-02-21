@@ -5,10 +5,10 @@ from time import strftime
 from flask import Blueprint, render_template, request
 from flask_login import login_required, current_user
 
+from component.nav_panel import nav_panel
 from graph import graph_generator
 from graph.graph_picker import GraphPicker
 from graph.interval import *
-from component.nav_panel import nav_panel
 from utils.graph_util import parse_date_range
 
 views = Blueprint(__name__, "views")
@@ -66,8 +66,3 @@ def graph():
         end_date=end_date,
         admin_modal=admin_modal
     )
-
-
-@views.route("/test")
-def test():
-    return render_template("test.html")

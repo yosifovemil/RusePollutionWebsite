@@ -1,18 +1,18 @@
+from bs4 import BeautifulSoup, NavigableString, Tag
 from flask import url_for
 
 from component.nav_panel import constants
-from bs4 import BeautifulSoup, NavigableString, Tag
 
 
 def build_form(dates: str, measurement: str, interval: str) -> Tag:
     soup = BeautifulSoup('')
     form = soup.new_tag(
         name="form",
-        attrs={'action': '/graph', 'method': 'POST', 'class': 'd-flex'}
+        attrs={'action': '/graph', 'method': 'POST', 'class': 'navbar-nav'}
     )
 
     measurement_attrs = {
-        'class': 'measurement align-middle',
+        'class': 'measurement align-middle nav-item',
         'style': 'height: 100%',
         'id': 'large-select2-options-single-field',
         'name': 'measurement'
