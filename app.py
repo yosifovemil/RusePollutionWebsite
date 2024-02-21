@@ -2,6 +2,9 @@ import logging
 import os
 from logging.handlers import RotatingFileHandler
 
+from cheroot.wsgi import Server as WSGIServer
+from cheroot.wsgi import PathInfoDispatcher as WSGIPathInfoDispatcher
+from cheroot.ssl.builtin import BuiltinSSLAdapter
 from flask import Flask
 from waitress import serve
 
@@ -33,5 +36,13 @@ app.config.update(
 oauth.init_app(app)
 login_manager.init_app(app)
 
-if __name__ == "__main__":
-    serve(app, host='0.0.0.0', port=3000, threads=4)
+my_app = WSGIPathInfoDispatcher({'/': app})
+server = WSGIServer(('0.0.0.0', 443), my_app)
+
+server.ssl_adapter = BuiltinSSLAdapter(config.ssl_certificate, config.ssl_key, None)
+
+if __name__ == '__main__':
+    try:
+        server.start()
+    except KeyboardInterrupt:
+        server.stop()
