@@ -1,0 +1,121 @@
+body {
+    background-color: #deebe9;
+}
+
+.navbar {
+    background-color: #42AF9A96 !important;
+}
+
+.nav-item {
+    margin-left:12px;
+}
+
+.select2-selection__rendered {
+    height: 100% !important;
+    font-size: 1.1em !important;
+    line-height: 100% !important;
+    display: inline-flex !important;
+    align-items: center;
+    color: white !important;
+}
+
+.select2-container .select2-selection--single {
+    height: 100% !important;
+    text-align: center;
+    background-color: #3ba79b;
+}
+
+.select2-container .select2-selection--single:hover {
+    background-color: #227d73;
+}
+
+.select2-selection__arrow {
+    height: 100% !important;
+}
+
+.select2 .selection {
+    height: 100% !important;
+}
+
+.select2-dropdown {
+    background-color: #3ba79b;
+    color: white;
+}
+
+.select2-search__field {
+    background-color: #addad1;
+}
+
+.select2-container--default .select2-results__option--highlighted.select2-results__option--selectable {
+    background-color: #227d73;
+}
+
+.select2-container--default .select2-results__option--selected {
+    background-color: #3ba79b;
+    color: white;
+}
+
+.interval {
+    font-size: 1.1em;
+    background-color: #3ba79b;
+    border: 1px solid #aaa;
+    border-radius: 4px;
+    color: white;
+}
+
+.interval:hover {
+    background-color: #227d73;
+}
+
+.dates-input {
+    background-color: #3ba79b;
+    color: white;
+    border: 1px solid #aaa;
+    border-radius: 4px;
+}
+
+.dates-input:hover {
+    background-color: #227d73;
+}
+
+.drp-calendar {
+    background-color: #8fd0c3 !important;
+}
+
+.daterangepicker .calendar-table {
+    background-color: #8fd0c3;
+    color: black;
+}
+
+.daterangepicker td.off {
+    background-color: #8fd0c3;
+}
+
+.daterangepicker td.in-range,
+.daterangepicker td.off.in-range {
+    background-color: #3ba79b;
+    color: white;
+}
+
+.daterangepicker td.off.start-date,
+.daterangepicker td.active {
+    background-color: #2d837a;
+    color:white;
+}
+
+.btn-secondary {
+    background-color: #3ba79b;
+}
+
+.btn-secondary:hover {
+    background-color: #227d73;
+}
+
+.drp-buttons {
+    background-color: #8fd0c3;
+    color: black;
+}
+
+.drp-buttons .applyBtn {
+    background-color: #2d837a !important;
+}

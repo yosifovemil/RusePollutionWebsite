@@ -2,12 +2,13 @@ import logging
 import traceback
 from time import strftime
 
-from flask import Blueprint, render_template, request, url_for, redirect
+from flask import Blueprint, render_template, request
+from flask_login import login_required, current_user
 
 from graph import graph_generator
 from graph.graph_picker import GraphPicker
 from graph.interval import *
-from static.form import form_builder
+from component.nav_panel import nav_panel
 from utils.graph_util import parse_date_range
 
 views = Blueprint(__name__, "views")
@@ -34,6 +35,7 @@ def exceptions(e):
 
 
 @views.route("/graph", methods=["GET", "POST"])
+@login_required
 def graph():
     measurement = request.values.get("measurement", default="Бензен")
     raw_dates = request.values.get("dates", default="01/12/2023 - 10/12/2023")
@@ -44,17 +46,28 @@ def graph():
         return ""  # TODO error
 
     try:
-        graph = graph_generator.make_apexchart(measurement, start_date, end_date, interval)
+        graph_component = graph_generator.make_apexchart(measurement, start_date, end_date, interval)
     except Exception as e:
         print(e)
-        graph = None
+        graph_component = None
 
-    form = form_builder.build(dates=raw_dates, measurement=measurement, interval=interval)
+    admin = current_user.admin
+
+    graph_form = nav_panel.build_form(dates=raw_dates, measurement=measurement, interval=interval)
+    nav_buttons = nav_panel.build_nav_buttons(admin=admin)
+    admin_modal = ""  # TODO nav_panel.build_admin_modal(admin=admin)
 
     return render_template(
-        "graph_form.html",
-        graph=graph,
-        form=form,
+        "graph.html",
+        graph=graph_component,
+        graph_form=graph_form,
+        nav_buttons=nav_buttons,
         start_date=start_date,
-        end_date=end_date
+        end_date=end_date,
+        admin_modal=admin_modal
     )
+
+
+@views.route("/test")
+def test():
+    return render_template("test.html")

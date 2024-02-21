@@ -5,7 +5,7 @@ class User(UserMixin):
     def __init__(self, user: dict):
         self.id = user['id']
         self.username = user['username']
-        self.password = bytes(user['password'], encoding="UTF-8")
+        self.password = password_to_bytes(user['password'])
         self.name = user['name']
         self.photo = user['photo']
         self.active = bool(user['active'])
@@ -27,3 +27,10 @@ class User(UserMixin):
 
 class Anonymous(AnonymousUserMixin):
     name = u"Anonymous"
+
+
+def password_to_bytes(password: str | None) -> str | None:
+    if password is not None:
+        return bytes(password, encoding='UTF-8')
+    else:
+        return None

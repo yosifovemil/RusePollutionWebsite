@@ -18,14 +18,15 @@ class WebsiteDB(DBClient):
         self.db = self.setup_connection(db_location=self.config.website_db_path, bootstrap_query=self.db_bootstrap)
 
     def update_user(self, user: User):
-        query = f"""
-        UPDATE Users
-        SET username = '{user.username}'
-            name = '{user.name}'
-            photo = '{user.photo}'         
-        WHERE 
-            id = '{user.id}'
-        """
+        query = (
+            "UPDATE Users "
+            "SET "
+            f"username = '{user.username}', "
+            f"name = '{user.name}', "
+            f"photo = '{user.photo}' "
+            "WHERE "
+            f"id = '{user.id}'"
+        )
 
         self.run_query(query=query)
 
@@ -38,6 +39,22 @@ class WebsiteDB(DBClient):
         query = f"SELECT * FROM Users WHERE id = '{id}'"
         result = self.select_single_row(query)
         return adapt_db_user(result)
+
+    def add_user(self, username: str, password_hash: str = None):
+        query = "INSERT INTO Users VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
+
+        self.db.execute(
+            query,
+            (None, username, password_hash, None, None, True, False, 'temporary',)
+        )
+
+    def create_user(self, username: str, password_hash: bytes):
+        query = (
+            "INSERT INTO Users"
+            f"Values (NULL, '{username}', '{password_hash}', NULL, NULL, TRUE, FALSE, 'temporary'"
+        )
+
+        self.db.execute(query)
 
 
 def adapt_db_user(db_user: dict | None) -> User | None:

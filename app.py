@@ -6,9 +6,10 @@ from flask import Flask
 from waitress import serve
 
 from auth import oauth, auth_blueprint
-from authenticate.login import login_manager
+from authenticate.user_manager import login_manager
 from config import Config
 from views import views
+from admin import admin
 
 # Logger setup
 log_location = os.path.join(os.path.expanduser("~"), "logs", "RusePollutionWebsite.log")
@@ -23,6 +24,7 @@ config = Config()
 app = Flask(__name__)
 app.register_blueprint(views, url_prefix="/")
 app.register_blueprint(auth_blueprint, url_prefix="/")
+app.register_blueprint(admin, url_prefix="/")
 app.config.update(
     SECRET_KEY=config.website_secret,
     TEMPLATES_AUTO_RELOAD=True,

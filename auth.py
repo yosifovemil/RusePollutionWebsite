@@ -1,9 +1,9 @@
 import logging
 
-from flask import Blueprint, redirect, url_for, render_template, session, request, abort, Request
-from flask_login import logout_user, login_user
+from flask import Blueprint, redirect, url_for, render_template, request
+from flask_login import logout_user, login_user, login_required
 from authlib.integrations.flask_client import OAuth
-from authenticate.login import google_login, temp_user_login
+from authenticate.user_manager import google_login, temp_user_login
 from authenticate.user import User
 from config import Config
 
@@ -26,8 +26,13 @@ oauth.register(
 
 
 @auth_blueprint.route('/')
-def landing():
-    return render_template("landing.html")
+def root():
+    return redirect(url_for("auth.index"))
+
+
+@auth_blueprint.route('/index')
+def index():
+    return render_template("index.html")
 
 
 @auth_blueprint.route('/login')
@@ -64,8 +69,10 @@ def temp_login():
 
 
 @auth_blueprint.route("/logout")
+@login_required
 def logout():
     logout_user()
+    return redirect(url_for("auth.index"))
 
 
 def redirect_after_login(user: User):
