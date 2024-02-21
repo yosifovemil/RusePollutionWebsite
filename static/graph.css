@@ -7,20 +7,24 @@ body {
 }
 
 .nav-item {
-    margin-left:12px;
+    margin-right:12px;
+    margin-bottom: 6px;
 }
 
 .select2-selection__rendered {
-    height: 100% !important;
     font-size: 1.1em !important;
     line-height: 100% !important;
+    height: 100% !important;
     display: inline-flex !important;
     align-items: center;
     color: white !important;
+    max-width: 100%;
+    white-space: break-spaces !important;
 }
 
 .select2-container--default {
-    width: 100% !important;
+    margin-bottom: 6px;
+    margin-right: 12px;
 }
 
 .select2-container .select2-selection--single {

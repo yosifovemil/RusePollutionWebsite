@@ -12,7 +12,7 @@ def build_form(dates: str, measurement: str, interval: str) -> Tag:
     )
 
     measurement_attrs = {
-        'class': 'measurement align-middle',
+        'class': 'measurement align-middle nav-item',
         'style': 'height: 100%',
         'id': 'large-select2-options-single-field',
         'name': 'measurement'
@@ -24,9 +24,6 @@ def build_form(dates: str, measurement: str, interval: str) -> Tag:
         selected=measurement,
         attrs=measurement_attrs
     )
-
-    measurement_div = __build_div(attrs={'class': 'nav-item'})
-    measurement_div.insert(0, measurement_select)
 
     interval_attrs = {
         'class': 'interval align-middle nav-item',
@@ -45,7 +42,7 @@ def build_form(dates: str, measurement: str, interval: str) -> Tag:
     submit_input = soup.new_tag("input", **{'type': 'submit'})
     submit_input.insert(0, submit)
 
-    form.append(measurement_div)
+    form.append(measurement_select)
     form.append(interval_select)
     form.append(dates_input)
     form.append(submit)
