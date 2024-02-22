@@ -36,7 +36,7 @@ oauth.init_app(app)
 login_manager.init_app(app)
 
 my_app = WSGIPathInfoDispatcher({'/': app})
-server = WSGIServer(('0.0.0.0', 443), my_app)
+server = WSGIServer(('0.0.0.0', 8443), my_app)
 
 server.ssl_adapter = BuiltinSSLAdapter(config.ssl_certificate, config.ssl_key, None)
 
