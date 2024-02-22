@@ -2,16 +2,14 @@ import logging
 import os
 from logging.handlers import RotatingFileHandler
 
-from cheroot.wsgi import Server as WSGIServer
-from cheroot.wsgi import PathInfoDispatcher as WSGIPathInfoDispatcher
-from cheroot.ssl.builtin import BuiltinSSLAdapter
 from flask import Flask
+from waitress import serve
 
+from admin import admin
 from auth import oauth, auth_blueprint
 from authenticate.user_manager import login_manager
 from config import Config
 from views import views
-from admin import admin
 
 # Logger setup
 log_location = os.path.join(os.path.expanduser("~"), "logs", "RusePollutionWebsite.log")
@@ -35,13 +33,5 @@ app.config.update(
 oauth.init_app(app)
 login_manager.init_app(app)
 
-my_app = WSGIPathInfoDispatcher({'/': app})
-server = WSGIServer(('0.0.0.0', 8443), my_app)
-
-server.ssl_adapter = BuiltinSSLAdapter(config.ssl_certificate, config.ssl_key, None)
-
 if __name__ == '__main__':
-    try:
-        server.start()
-    except KeyboardInterrupt:
-        server.stop()
+    serve(app, host='0.0.0.0', port=3000)

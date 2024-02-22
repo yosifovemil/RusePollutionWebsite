@@ -28,9 +28,6 @@ class Config:
         self.google_secret = read_config(GOOGLE_SECRET_LOCATION)['web']
         self.website_secret = read_file(WEBSITE_SECRET_LOCATION)
 
-        self.ssl_key = Path(website_config['ssl_key'])
-        self.ssl_certificate = Path(website_config['ssl_certificate'])
-
 
 def read_config(file_location: str) -> dict:
     with open(file_location, 'r', encoding="UTF8") as f:
