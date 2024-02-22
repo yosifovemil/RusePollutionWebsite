@@ -6,7 +6,6 @@ from cheroot.wsgi import Server as WSGIServer
 from cheroot.wsgi import PathInfoDispatcher as WSGIPathInfoDispatcher
 from cheroot.ssl.builtin import BuiltinSSLAdapter
 from flask import Flask
-from waitress import serve
 
 from auth import oauth, auth_blueprint
 from authenticate.user_manager import login_manager
