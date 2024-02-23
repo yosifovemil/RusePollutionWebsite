@@ -4,6 +4,7 @@ from logging.handlers import RotatingFileHandler
 
 from flask import Flask
 from waitress import serve
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 from admin import admin
 from auth import oauth, auth_blueprint
@@ -32,6 +33,10 @@ app.config.update(
 
 oauth.init_app(app)
 login_manager.init_app(app)
+
+app.wsgi_app = ProxyFix(
+    app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1
+)
 
 if __name__ == '__main__':
     serve(app, host='0.0.0.0', port=3000)

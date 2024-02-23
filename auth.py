@@ -38,7 +38,6 @@ def index():
 @auth_blueprint.route('/login')
 def login():
     redirect_uri = url_for('auth.login_callback', _external=True)
-    redirect_uri="https://air.dishairuse.com/login_callback"
     return oauth.google.authorize_redirect(redirect_uri)
 
 
