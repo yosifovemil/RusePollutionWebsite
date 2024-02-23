@@ -33,6 +33,9 @@ $(document).ready(function(){
         },
         yaxis: {
             min: 0
+        },
+        theme: {
+            palette: 'palette7'
         }
     };
 

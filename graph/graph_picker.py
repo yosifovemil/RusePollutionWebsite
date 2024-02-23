@@ -1,12 +1,14 @@
-from database.client import DBClient
-import pandas as pd
 import json
+
+import pandas as pd
+
+from database.data_db import DataDB
 
 
 class GraphPicker:
     def __init__(self):
-        db_client = DBClient()
-        self.choices = build_choices(db_client.run_query(db_client.graph_picker_query))
+        db_client = DataDB()
+        self.choices = build_choices(db_client.select_query(db_client.graph_picker_query))
 
 
 def build_choices(query_result: pd.DataFrame) -> str:

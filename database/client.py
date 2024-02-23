@@ -1,51 +1,71 @@
-import apsw.bestpractice
+import logging
 import os
 from pathlib import Path
-import logging
+from typing import Dict, Any
 
+import apsw.bestpractice
 import pandas as pd
 
 from config import Config
-from utils.singleton import Singleton
 
 apsw.bestpractice.apply(apsw.bestpractice.recommended)
 
 
-class DBClient(metaclass=Singleton):
+class DBClient:
 
     def __init__(self):
-        config = Config()
-        self.db = setup_connection(config.db_path)
-        self.graph_picker_query = read_file(Path("database/sql/graph_picker_choices.sql"))
+        self.config = Config()
 
-    def run_query(self, query: str) -> pd.DataFrame:
-        cursor = self.db.execute(query)
-        columns = [description[0] for description in cursor.description]
-        data = [row for row in cursor]
-        data_frame = pd.DataFrame(data, columns=columns)
+    def run_query(self, query: str):
+        self.db.execute(query)
 
-        if 'date' in columns:
+    def __extract_results(self, cursor: apsw.Connection) -> list:
+        headings = []
+        rows = []
+        for db_row in cursor:
+            if not headings:
+                headings = [desc[0] for desc in cursor.description]
+
+            row = dict(zip(headings, db_row))
+            rows.append(row)
+
+        return rows
+
+    def select_single_row(self, query: str) -> dict | None:
+        rows = self.__extract_results(self.db.execute(query))
+        if len(rows) == 0:
+            return None
+        elif len(rows) > 1:
+            raise Exception("More than 1 results found")
+        else:
+            return rows[0]
+
+    def select_query(self, query: str) -> pd.DataFrame:
+        data = self.__extract_results(self.db.execute(query))
+        data_frame = pd.DataFrame(data)
+
+        if 'date' in data_frame.columns:
             data_frame['date'] = pd.to_datetime(data_frame['date'], format="%Y-%m-%d %H:%M:%S")
 
         return data_frame
 
+    def setup_connection(self, db_location: Path, bootstrap_query: str = None):
+        if not db_location.parent.absolute().exists():
+            os.mkdir(db_location.parent.absolute())
 
-def setup_connection(db_location: Path):
-    if not db_location.parent.absolute().exists():
-        os.mkdir(db_location.parent.absolute())
+        bootstrap = False
+        if not db_location.exists() and bootstrap_query is not None:
+            bootstrap = True
 
-    connection = apsw.Connection(str(db_location))
-    connection.pragma("foreign_keys", True)
+        connection = apsw.Connection(str(db_location))
+        connection.pragma("foreign_keys", True)
 
-    check = connection.pragma("integrity_check")
-    if check != "ok":
-        logging.error("Integrity check errors", check)
+        check = connection.pragma("integrity_check")
+        if check != "ok":
+            logging.error("Integrity check errors", check)
+            raise Exception(f"Database {str(db_location)} failed integrity check")
 
-    return connection
+        if bootstrap:
+            connection.execute(bootstrap_query)
 
-
-def read_file(file: Path):
-    f = file.open()
-    content = f.read()
-    f.close()
-    return content
+        return connection

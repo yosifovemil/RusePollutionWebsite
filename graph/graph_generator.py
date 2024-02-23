@@ -1,13 +1,14 @@
 import json
+from functools import reduce
 
 import pandas as pd
-from database.client import DBClient
+
+from database.data_db import DataDB
 from graph.interval import summarise_to_interval
-from functools import reduce
 
 
 def make_apexchart(measurement: str, start_date: str, end_date: str, interval: str) -> dict:
-    db_client = DBClient()
+    db_client = DataDB()
     query = f"""
     SELECT date, Station.name AS stationName, MeasurementInterval.name as interval, value
     FROM Reading
@@ -19,7 +20,7 @@ def make_apexchart(measurement: str, start_date: str, end_date: str, interval: s
     AND date <= '{end_date}'
     """
 
-    query_data = db_client.run_query(query)
+    query_data = db_client.select_query(query)
     data = build_graph_data(query_data, interval)
 
     stations = data.columns.tolist()
@@ -32,7 +33,7 @@ def make_apexchart(measurement: str, start_date: str, end_date: str, interval: s
             'data': data[station].round(1).tolist()
         })
 
-    dates = (data['date'].astype('int64')/1000000).tolist()
+    dates = (data['date'].astype('int64') / 1000000).tolist()
 
     y_vals = json.dumps(series, ensure_ascii=False).replace("NaN", "null")
 

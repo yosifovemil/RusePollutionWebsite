@@ -1,31 +1,19 @@
-from typing import Tuple
+import logging
+import traceback
+from time import strftime
 
 from flask import Blueprint, render_template, request
+from flask_login import login_required, current_user
 
+from component.nav_panel import nav_panel
+from graph import graph_generator
 from graph.graph_picker import GraphPicker
 from graph.interval import *
-from config import Config
-import logging
-from logging.handlers import RotatingFileHandler
-from time import strftime
-import traceback
-import os
-from graph import graph_generator
-from static.form import form_builder
-from datetime import datetime, timedelta
-import utils.formats as formats
+from utils.graph_util import parse_date_range
 
 views = Blueprint(__name__, "views")
-
-# Logger setup
-log_location = os.path.join(os.path.expanduser("~"), "logs", "RusePollutionWebsite.log")
 logger = logging.getLogger('tdm')
-logger.setLevel(logging.INFO)
-handler = RotatingFileHandler(log_location, maxBytes=100000, backupCount=3)
-logger.addHandler(handler)
 
-# Config
-config = Config()
 graph_picker = GraphPicker()
 
 
@@ -46,36 +34,35 @@ def exceptions(e):
     return e.status_code
 
 
-@views.route("/", methods=["GET", "POST"])
+@views.route("/graph", methods=["GET", "POST"])
+@login_required
 def graph():
     measurement = request.values.get("measurement", default="Бензен")
     raw_dates = request.values.get("dates", default="01/12/2023 - 10/12/2023")
-    start_date, end_date = parse_dates(raw_dates)
+    start_date, end_date = parse_date_range(raw_dates)
 
     interval = request.values.get("interval", default=INTERVAL_DAILY)
     if interval not in VALID_INTERVALS:
         return ""  # TODO error
 
     try:
-        graph = graph_generator.make_apexchart(measurement, start_date, end_date, interval)
+        graph_component = graph_generator.make_apexchart(measurement, start_date, end_date, interval)
     except Exception as e:
         print(e)
-        graph = None
+        graph_component = None
 
-    form = form_builder.build(dates=raw_dates, measurement=measurement, interval=interval)
+    admin = current_user.admin
+
+    graph_form = nav_panel.build_form(dates=raw_dates, measurement=measurement, interval=interval)
+    nav_buttons = nav_panel.build_nav_buttons(admin=admin)
+    admin_modal = ""  # TODO nav_panel.build_admin_modal(admin=admin)
 
     return render_template(
-        "graph_form.html",
-        graph=graph,
-        form=form,
+        "graph.html",
+        graph=graph_component,
+        graph_form=graph_form,
+        nav_buttons=nav_buttons,
         start_date=start_date,
-        end_date=end_date
+        end_date=end_date,
+        admin_modal=admin_modal
     )
-
-
-def parse_dates(dates: str) -> tuple[str, str]:
-    dates_str = dates.split("-")
-    start_date = datetime.strptime(dates_str[0].strip(), "%d/%m/%Y")
-    end_date = datetime.strptime(dates_str[1].strip(), "%d/%m/%Y") + timedelta(days=1)
-
-    return start_date.strftime(formats.date_format), end_date.strftime(formats.date_format)
