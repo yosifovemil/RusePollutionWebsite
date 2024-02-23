@@ -29,6 +29,7 @@ app.register_blueprint(admin, url_prefix="/")
 app.config.update(
     SECRET_KEY=config.website_secret,
     TEMPLATES_AUTO_RELOAD=True,
+    SERVER_NAME='air.dishairuse.com'
 )
 
 oauth.init_app(app)
