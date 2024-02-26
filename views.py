@@ -49,7 +49,7 @@ def graph():
         graph_component = graph_generator.make_apexchart(measurement, start_date, end_date, interval)
     except Exception as e:
         print(e)
-        graph_component = None
+        graph_component = graph_generator.dummy_graph(measurement)
 
     admin = current_user.admin
 

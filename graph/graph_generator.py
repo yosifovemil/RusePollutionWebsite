@@ -5,12 +5,13 @@ import pandas as pd
 
 from database.data_db import DataDB
 from graph.interval import summarise_to_interval
+from graph.limits import LEGAL_LIMITS
 
 
 def make_apexchart(measurement: str, start_date: str, end_date: str, interval: str) -> dict:
     db_client = DataDB()
     query = f"""
-    SELECT date, Station.name AS stationName, MeasurementInterval.name as interval, value
+    SELECT date, Station.name AS stationName, MeasurementInterval.name as interval, value, Measurement.unit as unit
     FROM Reading
     LEFT JOIN Station ON Reading.stationId = Station.id
     LEFT JOIN Measurement ON Reading.measurementId = Measurement.id
@@ -37,10 +38,20 @@ def make_apexchart(measurement: str, start_date: str, end_date: str, interval: s
 
     y_vals = json.dumps(series, ensure_ascii=False).replace("NaN", "null")
 
+    annotations = build_annotations(
+        query_data=query_data,
+        measurement=measurement,
+        interval=interval
+    )
+
+    yaxis_title = get_unit(query_data)
+
     graph = {
         "x_vals": dates,
         "y_vals": y_vals,
         "title_text": measurement,
+        "annotations": annotations,
+        "yaxis_title": yaxis_title,
         "chart_type": "line" if len(dates) > 10 else "bar"
     }
 
@@ -48,6 +59,8 @@ def make_apexchart(measurement: str, start_date: str, end_date: str, interval: s
 
 
 def build_graph_data(data: pd.DataFrame, interval: str) -> pd.DataFrame:
+    data = data.copy()[['date', 'stationName', 'interval', 'value']]
+
     station_dfs = []
     for (station, group_interval), group in data.groupby(['stationName', 'interval'], as_index=False):
         summarised_data = summarise_to_interval(
@@ -67,3 +80,40 @@ def build_graph_data(data: pd.DataFrame, interval: str) -> pd.DataFrame:
 
 def merge_on_date(a: pd.DataFrame, b: pd.DataFrame) -> pd.DataFrame:
     return a.merge(b, how='outer', on='date')
+
+
+def build_annotations(query_data: pd.DataFrame, measurement: str, interval: str) -> dict:
+    annotations = {
+        'y_min': query_data['value'].min()
+    }
+    if measurement in LEGAL_LIMITS.keys() and interval in LEGAL_LIMITS[measurement].keys():
+        annotations['limit'] = LEGAL_LIMITS[measurement][interval]
+        annotations['y_max'] = max(query_data['value'].max(), annotations['limit'])
+    else:
+        annotations['limit'] = "undefined"
+        annotations['y_max'] = query_data['value'].max()
+
+    return annotations
+
+
+def get_unit(query_data: pd.DataFrame) -> str:
+    units = query_data['unit'].unique()
+    if len(units) == 1:
+        return units[0]
+    else:
+        return "Грешка с мерните единици"
+
+
+def dummy_graph(measurement: str) -> dict:
+    return {
+        "x_vals": [],
+        "y_vals": [],
+        "title_text": measurement,
+        "annotations": {
+            'y_min': "",
+            'y_max': "",
+            'limit': ""
+        },
+        "yaxis_title": "",
+        "chart_type": "line"
+    }

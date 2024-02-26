@@ -39,6 +39,12 @@
         var title_text = "{{ graph['title_text'] | safe }}"
 
 
+        var y_limit = {{ graph['annotations']['limit'] | safe }}
+        var y_max = {{ graph['annotations']['y_max'] | safe }}
+        var y_min = {{ graph['annotations']['y_min'] | safe }}
+
+        var yaxis_title = "{{ graph['yaxis_title'] | safe }}"
+
     </script>
     <script>
         $(document).ready(function() {

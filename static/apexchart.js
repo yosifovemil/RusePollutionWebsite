@@ -32,12 +32,40 @@ $(document).ready(function(){
             }
         },
         yaxis: {
-            min: 0
+            min: y_min,
+            max: y_max,
+            title: {
+                text: yaxis_title,
+                style: {
+                    fontSize: '12px'
+                }
+            }
         },
         theme: {
             palette: 'palette7'
         }
     };
+
+    if (y_limit !== undefined) {
+        options['annotations'] = {
+            yaxis: [
+                {
+                    y: y_limit,
+                    y2: y_max,
+                    fillColor: '#EED202',
+                    label: {
+                        borderColor: '#EED202',
+                        style: {
+                            color: '#fff',
+                            background: '#EED202'
+                        },
+                        text: 'Пределно допустима концентрация ' + y_limit
+                    }
+                }
+            ]
+        }
+
+    }
 
     var chart = new ApexCharts(document.querySelector("#plot"), options);
     chart.render();
