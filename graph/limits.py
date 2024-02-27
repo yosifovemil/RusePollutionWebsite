@@ -33,5 +33,17 @@ LEGAL_LIMITS = {
     "Фини прахови частици ФПЧ10": {
         INTERVAL_HOURLY: 50,
         INTERVAL_DAILY: 200
+    },
+    "р-Крезол": {
+        INTERVAL_HOURLY: 5,
+        INTERVAL_DAILY: 5
+    },
+    "p-Крезол": {
+        INTERVAL_HOURLY: 5,
+        INTERVAL_DAILY: 5
+    },
+    "о-Крезол": {
+        INTERVAL_HOURLY: 5,
+        INTERVAL_DAILY: 5
     }
 }
