@@ -28,18 +28,21 @@ def make_apexchart(measurement: str, start_date: str, end_date: str, interval: s
     stations.remove("date")
 
     series = []
+    y_stats_data = []
     for station in stations:
         series.append({
             'name': station,
             'data': data[station].round(1).tolist()
         })
 
+        y_stats_data = y_stats_data + data[station].round(1).tolist()
+
     dates = (data['date'].astype('int64') / 1000000).tolist()
 
     y_vals = json.dumps(series, ensure_ascii=False).replace("NaN", "null")
 
     annotations = build_annotations(
-        query_data=query_data,
+        y_stats_data=y_stats_data,
         measurement=measurement,
         interval=interval
     )
@@ -82,16 +85,16 @@ def merge_on_date(a: pd.DataFrame, b: pd.DataFrame) -> pd.DataFrame:
     return a.merge(b, how='outer', on='date')
 
 
-def build_annotations(query_data: pd.DataFrame, measurement: str, interval: str) -> dict:
+def build_annotations(y_stats_data: list[float], measurement: str, interval: str) -> dict:
     annotations = {
-        'y_min': query_data['value'].min()
+        'y_min': min(y_stats_data)
     }
     if measurement in LEGAL_LIMITS.keys() and interval in LEGAL_LIMITS[measurement].keys():
         annotations['limit'] = LEGAL_LIMITS[measurement][interval]
-        annotations['y_max'] = max(query_data['value'].max(), annotations['limit'])
+        annotations['y_max'] = max(max(y_stats_data), annotations['limit'])
     else:
         annotations['limit'] = "undefined"
-        annotations['y_max'] = query_data['value'].max()
+        annotations['y_max'] = max(y_stats_data)
 
     return annotations
 
