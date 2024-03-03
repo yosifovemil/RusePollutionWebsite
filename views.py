@@ -1,5 +1,6 @@
 import logging
 import traceback
+from datetime import datetime, timedelta
 from time import strftime
 
 from flask import Blueprint, render_template, request
@@ -38,7 +39,7 @@ def exceptions(e):
 @login_required
 def graph():
     measurement = request.values.get("measurement", default="Бензен")
-    raw_dates = request.values.get("dates", default="01/12/2023 - 10/12/2023")
+    raw_dates = request.values.get("dates", default=get_default_dates())
     start_date, end_date = parse_date_range(raw_dates)
 
     interval = request.values.get("interval", default=INTERVAL_DAILY)
@@ -66,3 +67,10 @@ def graph():
         end_date=end_date,
         admin_modal=admin_modal
     )
+
+
+def get_default_dates() -> str:
+    end_date = datetime.now()
+    start_date = end_date - timedelta(days=5)
+
+    return start_date.strftime("%d/%m/%Y") + " - " + end_date.strftime("%d/%m/%Y")
