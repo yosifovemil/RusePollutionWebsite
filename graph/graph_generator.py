@@ -12,6 +12,8 @@ def make_apexchart(measurement: str, start_date: str, end_date: str, interval: s
     db_client = DataDB()
     if measurement == 'p-о- Крезол':
         query = build_query(measurements=['p-Крезол', 'о-Крезол'], start_date=start_date, end_date=end_date)
+    elif measurement == 'Ксилен':
+        query = build_query(measurements=['Ксилен', 'm- p-Ксилен', 'о-Ксилен'], start_date=start_date, end_date=end_date)
     else:
         query = build_query(measurements=[measurement], start_date=start_date, end_date=end_date)
 
