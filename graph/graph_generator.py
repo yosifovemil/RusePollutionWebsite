@@ -10,18 +10,13 @@ from graph.limits import LEGAL_LIMITS
 
 def make_apexchart(measurement: str, start_date: str, end_date: str, interval: str) -> dict:
     db_client = DataDB()
-    query = f"""
-    SELECT date, Station.name AS stationName, MeasurementInterval.name as interval, value, Measurement.unit as unit
-    FROM Reading
-    LEFT JOIN Station ON Reading.stationId = Station.id
-    LEFT JOIN Measurement ON Reading.measurementId = Measurement.id
-    LEFT JOIN MeasurementInterval ON Reading.intervalId = MeasurementInterval.id
-    WHERE Measurement.name = '{measurement}'
-    AND date >= '{start_date}'
-    AND date <= '{end_date}'
-    """
+    if measurement == 'p-о- Крезол':
+        query = build_query(measurements=['p-Крезол', 'о-Крезол'], start_date=start_date, end_date=end_date)
+    else:
+        query = build_query(measurements=[measurement], start_date=start_date, end_date=end_date)
 
     query_data = db_client.select_query(query)
+    query_data = query_data.groupby(['date', 'stationName', 'interval', 'unit'], as_index=False).sum()
     data = build_graph_data(query_data, interval)
 
     stations = data.columns.tolist()
@@ -59,6 +54,20 @@ def make_apexchart(measurement: str, start_date: str, end_date: str, interval: s
     }
 
     return graph
+
+
+def build_query(measurements: list[str], start_date: str, end_date: str) -> str:
+    measurements_q = "('" + str.join("', '", measurements) + "')"
+    return f"""
+    SELECT date, Station.name AS stationName, MeasurementInterval.name as interval, value, Measurement.unit as unit
+    FROM Reading
+    LEFT JOIN Station ON Reading.stationId = Station.id
+    LEFT JOIN Measurement ON Reading.measurementId = Measurement.id
+    LEFT JOIN MeasurementInterval ON Reading.intervalId = MeasurementInterval.id
+    WHERE Measurement.name IN {measurements_q}
+    AND date >= '{start_date}'
+    AND date <= '{end_date}'
+    """
 
 
 def build_graph_data(data: pd.DataFrame, interval: str) -> pd.DataFrame:

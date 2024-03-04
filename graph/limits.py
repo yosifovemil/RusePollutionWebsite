@@ -41,5 +41,9 @@ LEGAL_LIMITS = {
     "о-Крезол": {
         INTERVAL_HOURLY: 5,
         INTERVAL_DAILY: 5
+    },
+    "p-о- Крезол": {
+        INTERVAL_HOURLY: 5,
+        INTERVAL_DAILY: 5
     }
 }
