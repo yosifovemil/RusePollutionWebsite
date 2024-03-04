@@ -34,10 +34,6 @@ LEGAL_LIMITS = {
         INTERVAL_HOURLY: 50,
         INTERVAL_DAILY: 200
     },
-    "р-Крезол": {
-        INTERVAL_HOURLY: 5,
-        INTERVAL_DAILY: 5
-    },
     "p-Крезол": {
         INTERVAL_HOURLY: 5,
         INTERVAL_DAILY: 5
