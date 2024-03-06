@@ -1,4 +1,4 @@
-from graph.interval import *
+from data.interval import *
 
 LEGAL_LIMITS = {
     "Азотен оксид NO": {

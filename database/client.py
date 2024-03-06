@@ -40,12 +40,12 @@ class DBClient:
         else:
             return rows[0]
 
-    def select_query(self, query: str) -> pd.DataFrame:
+    def select_query(self, query: str, date_format="%Y-%m-%d %H:%M:%S") -> pd.DataFrame:
         data = self.__extract_results(self.db.execute(query))
         data_frame = pd.DataFrame(data)
 
         if 'date' in data_frame.columns:
-            data_frame['date'] = pd.to_datetime(data_frame['date'], format="%Y-%m-%d %H:%M:%S")
+            data_frame['date'] = pd.to_datetime(data_frame['date'], format=date_format)
 
         return data_frame
 

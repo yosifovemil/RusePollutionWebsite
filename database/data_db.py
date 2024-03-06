@@ -14,3 +14,4 @@ class DataDB(DBClient):
         super().__init__()
         self.db = self.setup_connection(db_location=self.config.data_db_path)
         self.graph_picker_query = read_file(Path("database/sql/graph_picker_choices.sql"))
+        self.create_emissions_event_table_query = read_file(Path("database/sql/create_emissions_event_table.sql"))

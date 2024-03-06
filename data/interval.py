@@ -18,8 +18,11 @@ VALID_INTERVALS = [
     INTERVAL_MAX_8HR
 ]
 
+MODE_SUM = 'sum'
+MODE_MEAN = 'mean'
 
-def summarise_to_interval(data: pd.DataFrame, old_interval: str, new_interval: str) -> pd.DataFrame:
+
+def summarise_to_interval(data: pd.DataFrame, old_interval: str, new_interval: str, mode: str = MODE_MEAN):
     if old_interval == new_interval:
         return data
 
@@ -37,6 +40,9 @@ def summarise_to_interval(data: pd.DataFrame, old_interval: str, new_interval: s
         return data
 
     data['date'] = pd.to_datetime(data.date.dt.strftime(format), format=format)
-    data = data.groupby(['date'], as_index=False).value.mean()
+    if mode == MODE_MEAN:
+        data = data.groupby(['date', 'stationName'], as_index=False).value.mean()
+    elif mode == MODE_SUM:
+        data = data.groupby(['date', 'stationName'], as_index=False).value.sum()
 
     return data
