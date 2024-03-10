@@ -6,6 +6,11 @@ import pandas as pd
 from data.interval import summarise_to_interval
 from data.limits import LEGAL_LIMITS
 from data import readings, emissions
+from datetime import datetime
+import urllib.parse
+
+SERVER_URL = 'https://air.dishairuse.com'
+# SERVER_URL = 'http://localhost:3000'
 
 
 def make_apexchart(measurement: str, start_date: str, end_date: str, interval: str) -> dict:
@@ -94,4 +99,26 @@ def make_emissions_table(start_date: str, end_date: str):
 
     summary.columns = ['Станция', 'Измерване', '% от периода с емисии над нормата']
 
-    return summary.to_html(index=False)
+    summary_measurements = []
+    for msmt in summary['Измерване'].values:
+        summary_measurements += [build_URL(msmt, start_date, end_date)]
+
+    summary['Измерване'] = summary_measurements
+
+    return summary.to_html(index=False, escape=False)
+
+
+def build_URL(measurement: str, start_date: str, end_date: str):
+    start_date = convert_format(start_date, "%Y-%m-%d", "%d/%m/%Y")
+    end_date = convert_format(end_date, "%Y-%m-%d", "%d/%m/%Y")
+
+    url = (f'{SERVER_URL}/graph?' +
+           f'measurement={urllib.parse.quote(measurement)}&' +
+           f'interval={urllib.parse.quote('Средночасова стойност')}&' +
+           f'dates={start_date}+-+{end_date}')
+
+    return f'<a href=\'{url}\'>{measurement}</a>'
+
+
+def convert_format(date: str, old_format: str, new_format: str) -> str:
+    return datetime.strptime(date, old_format).strftime(new_format)
