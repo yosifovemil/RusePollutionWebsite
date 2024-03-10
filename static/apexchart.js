@@ -43,6 +43,9 @@ $(document).ready(function(){
         },
         theme: {
             palette: 'palette7'
+        },
+        legend: {
+            showForSingleSeries: true
         }
     };
 
