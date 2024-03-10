@@ -111,10 +111,11 @@ def make_emissions_table(start_date: str, end_date: str):
 def build_URL(measurement: str, start_date: str, end_date: str):
     start_date = convert_format(start_date, "%Y-%m-%d", "%d/%m/%Y")
     end_date = convert_format(end_date, "%Y-%m-%d", "%d/%m/%Y")
+    interval = urllib.parse.quote('Средночасова стойност')
 
     url = (f'{SERVER_URL}/graph?' +
            f'measurement={urllib.parse.quote(measurement)}&' +
-           f'interval={urllib.parse.quote('Средночасова стойност')}&' +
+           f'interval={interval}&' +
            f'dates={start_date}+-+{end_date}')
 
     return f'<a href=\'{url}\'>{measurement}</a>'
