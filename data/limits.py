@@ -45,5 +45,9 @@ LEGAL_LIMITS = {
     "p-о- Крезол": {
         INTERVAL_HOURLY: 5,
         INTERVAL_DAILY: 5
+    },
+    "Бензен": {
+        INTERVAL_HOURLY: 5,
+        INTERVAL_DAILY: 5
     }
 }
